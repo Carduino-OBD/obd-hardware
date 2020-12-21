@@ -1,0 +1,3 @@
+[submodule "hardware/dependencies/freematics"]
+	path = hardware/dependencies/freematics
+	url = git@github.com:stanleyhuangyc/Freematics.git
