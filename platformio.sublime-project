@@ -1,0 +1,118 @@
+{
+	"build_systems":
+	[
+		{
+			"target": "terminus_exec",
+			"cmd":
+			[
+				"/usr/local/bin/pio",
+				"-c", "sublimetext",
+				"run",
+				"-t",
+				"monitor"
+			],
+			"file_regex": "^(..[^:\n]*):([0-9]+):?([0-9]+)?:? (.*)$",
+			"name": "PlatformIO",
+			"variants":
+			[
+				{
+					"target": "terminus_exec",
+					"cmd":
+					[
+						"/usr/local/bin/pio",
+						"-c", "sublimetext",
+						"run"
+					],
+					"file_regex": "^(..[^:\n]*):([0-9]+):?([0-9]+)?:? (.*)$",
+					"name": "Build"
+				},
+				{
+					"target": "terminus_exec",
+					"cmd":
+					[
+						"/usr/local/bin/pio",
+						"-c", "sublimetext",
+						"run",
+						"--target",
+						"upload"
+					],
+					"file_regex": "^(..[^:\n]*):([0-9]+):?([0-9]+)?:? (.*)$",
+					"name": "Upload and monitor"
+				},
+				{
+					"target": "terminus_exec",
+					"cmd":
+					[
+						"/usr/local/bin/pio",
+						"-c", "sublimetext",
+						"run",
+						"-t",
+						"monitor"
+					],
+					"file_regex": "^(..[^:\n]*):([0-9]+):?([0-9]+)?:? (.*)$",
+					"name": "Clean"
+				},
+				{
+					"target": "terminus_exec",
+					"cmd":
+					[
+						"/usr/local/bin/pio",
+						"-c", "sublimetext",
+						"test"
+					],
+					"file_regex": "^(..[^:\n]*):([0-9]+):?([0-9]+)?:? (.*)$",
+					"name": "Test"
+				},
+				{
+					"target": "terminus_exec",
+					"cmd":
+					[
+						"/usr/local/bin/pio",
+						"-c", "sublimetext",
+						"run",
+						"--target",
+						"uploadfs"
+					],
+					"file_regex": "^(..[^:\n]*):([0-9]+):?([0-9]+)?:? (.*)$",
+					"name": "Upload SPIFFS image"
+				},
+				{
+					"target": "terminus_exec",
+					"cmd":
+					[
+						"/usr/local/bin/pio",
+						"-c", "sublimetext",
+						"update"
+					],
+					"file_regex": "^(..[^:\n]*):([0-9]+):?([0-9]+)?:? (.*)$",
+					"name": "Update platforms and libraries"
+				},
+				{
+					"target": "terminus_exec",
+					"cmd":
+					[
+						"/usr/local/bin/pio",
+						"-c", "sublimetext",
+						"upgrade"
+					],
+					"name": "Upgrade PlatformIO Core"
+				}
+			],
+			"working_dir": "${project_path:${folder}}",
+			"selector": "source.c, source.c++"
+		}
+	],
+	"folders":
+	[
+		{
+			"path": "."
+		}
+	],
+    "settings":
+    {
+         "sublimegdb_workingdir": "/Users/Alex/Documents/carduino/obd-hardware",
+         "sublimegdb_exec_cmd": "",
+         "sublimegdb_commandline": "/usr/local/bin/pio -f -c sublimetext debug --interface=gdb --interpreter=mi -x .pioinit"
+
+    }
+}
