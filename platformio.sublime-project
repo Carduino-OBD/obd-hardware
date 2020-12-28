@@ -33,8 +33,10 @@
 						"/usr/local/bin/pio",
 						"-c", "sublimetext",
 						"run",
-						"--target",
-						"upload"
+						"-t",
+						"upload",
+						"-t",
+						"monitor"
 					],
 					"file_regex": "^(..[^:\n]*):([0-9]+):?([0-9]+)?:? (.*)$",
 					"name": "Upload and monitor"

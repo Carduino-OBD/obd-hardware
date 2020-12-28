@@ -15,3 +15,6 @@ Alternatively, the project can be run from the command line via:
 ```bash
 pio -c sublimetext run -t monitor
 ```
+
+## Usage
+The program assumes you have a Freematics ONE+ Model A with both a SIM card and MicroSD card installed.

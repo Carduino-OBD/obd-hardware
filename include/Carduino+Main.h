@@ -1,6 +1,9 @@
 #ifndef _CARDUINO_MAIN_H
 #define _CARDUINO_MAIN_H
+#include <FreematicsPlus.h>
 #include "Carduino+Bluetooth.h"
+#include "Carduino+GPS.h"
+#include "Carduino+Accelerometer.h"
 
 class Carduino_Main {
 
@@ -16,6 +19,8 @@ public:
     void runLoop(void);
 private:
     Carduino_Bluetooth *bluetoothAgent;
+    Carduino_GPS *gpsAgent;
+    Carduino_Accelerometer *accelerometerAgent;
 };
 
 #endif

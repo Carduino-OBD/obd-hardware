@@ -1,6 +1,7 @@
 #include "Carduino+Main.h"
-#include "Carduino+Bluetooth.h"
 #include <Arduino.h>
+
+FreematicsESP32 sys;
 
 //obd.enterLowPowerMode();
 /**
@@ -8,13 +9,20 @@
  */
 Carduino_Main::Carduino_Main() {
     Serial.begin(115200);
+    sys.begin(0, 1);
     Serial.println("Initializing Carduino...");
     this->bluetoothAgent = new Carduino_Bluetooth();
-    Serial.println("Done initializing...");
+    this->accelerometerAgent = new Carduino_Accelerometer();
+    this->gpsAgent = new Carduino_GPS(&sys);
+    Serial.println("Done initializing");
 }
 
 /**
  * Called every iteration of the arduino run loop
  */
 void Carduino_Main::runLoop(void) {
+    this->bluetoothAgent->runLoop();
+    this->accelerometerAgent->runLoop();
+    this->gpsAgent->runLoop();
+
 }
