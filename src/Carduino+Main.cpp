@@ -9,7 +9,7 @@ FreematicsESP32 sys;
  */
 Carduino_Main::Carduino_Main() {
     Serial.begin(115200);
-    sys.begin(0, 1);
+    sys.begin(1, 1);
     Serial.println("Initializing Carduino...");
     this->bluetoothAgent = new Carduino_Bluetooth();
     this->accelerometerAgent = new Carduino_Accelerometer();

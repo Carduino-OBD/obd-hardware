@@ -22,5 +22,9 @@ private:
                          const char *expected, unsigned int timeout);
     void cellUninit();
     bool cellInit();
+    bool cellGetGPSInfo(GPS_DATA *gd);
+
+    void processGPSData();
+    void waitGPS();
 };
 #endif
