@@ -5,11 +5,12 @@
 #include <BLEServer.h>
 
 #define SERVICE_UUID        "6a299733-725a-47fe-9df4-fa432b4c210c"
-#define CHARACTERISTIC_UUID "847d333c-0a92-41f6-9027-ed2c2be47aa0"
+#define MOTION_UUID         "d0ba1799-8dfe-4839-bb0f-f0bbb1756781"
+#define COMMAND_UUID        "847d333c-0a92-41f6-9027-ed2c2be47aa0"
 
 class MyCallbacks: public BLECharacteristicCallbacks {
-    void onWrite(BLECharacteristic *pCharacteristic) {
-        std::string value = pCharacteristic->getValue();
+    void onWrite(BLECharacteristic *commandCharacteristic) {
+        std::string value = commandCharacteristic->getValue();
 
         if (value.length() > 0) {
             Serial.println("*********");
@@ -23,28 +24,37 @@ class MyCallbacks: public BLECharacteristicCallbacks {
     }
 };
 
+BLECharacteristic *motionCharacteristic;
+BLECharacteristic *commandCharacteristic;
 
 /**
  * Create an instance of the bluetooth manager
  */
-Carduino_Bluetooth::Carduino_Bluetooth() {
+Carduino_Bluetooth::Carduino_Bluetooth(Carduino_GPS *gpsAgent) {
     Serial.println("Initializing Bluetooth...");
+
+    this->gpsAgent = gpsAgent;
 
 
     BLEDevice::init("Carduino");
     BLEServer *pServer = BLEDevice::createServer();
     BLEService *pService = pServer->createService(SERVICE_UUID);
-    BLECharacteristic *pCharacteristic = pService->createCharacteristic(
-            CHARACTERISTIC_UUID,
-            BLECharacteristic::PROPERTY_READ |
-            BLECharacteristic::PROPERTY_WRITE
-                                         );
 
-    pCharacteristic->setCallbacks(new MyCallbacks());
+    motionCharacteristic = pService->createCharacteristic(
+                               MOTION_UUID,
+                               BLECharacteristic::PROPERTY_READ
+                           );
 
-    pCharacteristic->setValue("Hello World says Neil");
+    commandCharacteristic = pService->createCharacteristic(
+                                COMMAND_UUID,
+                                BLECharacteristic::PROPERTY_READ |
+                                BLECharacteristic::PROPERTY_WRITE
+                            );
+
+    commandCharacteristic->setCallbacks(new MyCallbacks());
+
+    commandCharacteristic->setValue("Hello World says Neil");
     pService->start();
-    // BLEAdvertising *pAdvertising = pServer->getAdvertising();  // this still is working for backward compatibility
     BLEAdvertising *pAdvertising = BLEDevice::getAdvertising();
     pAdvertising->addServiceUUID(SERVICE_UUID);
     pAdvertising->setScanResponse(true);
@@ -57,5 +67,53 @@ Carduino_Bluetooth::Carduino_Bluetooth() {
 
 
 void Carduino_Bluetooth::runLoop(void) {
+    // GPS
+    // typedef struct {
+    //     uint32_t ts;
+    //     uint32_t date;
+    //     uint32_t time;
+    //     float lat;
+    //     float lng;
+    //     float alt; /* meter */
+    //     float speed; /* knot */
+    //     uint16_t heading; /* degree */
+    //     uint8_t hdop;
+    //     uint8_t sat;
+    //     uint16_t sentences;
+    //     uint16_t errors;
+    // } GPS_DATA;
+
+    // if (lastGPStime == gd->time) return;
+    // float kph = gd->speed * 1852 / 1000;
+
+    // Serial.print("[GPS] ");
+
+    // char buf[32];
+    // sprintf(buf, "%02u:%02u:%02u.%c",
+    //         gd->time / 1000000, (gd->time % 1000000) / 10000, (gd->time % 10000) / 100,
+    //         '0' + (gd->time % 100) / 10);
+    // Serial.print(buf);
+
+    // Serial.print(' ');
+    // Serial.print(gd->lat, 6);
+    // Serial.print(' ');
+    // Serial.print(gd->lng, 6);
+    // Serial.print(' ');
+    // Serial.print((int)kph);
+    // Serial.print("km/h");
+    // if (gd->sat) {
+    //     Serial.print(" SATS:");
+    //     Serial.print(gd->sat);
+    // }
+    // Serial.println();
+
+    // lastGPStime = gd->time;
+
+    uint8_t gpsData[21];
+    gpsData[0] = this->gpsAgent->gd->time;
+    gpsData[1] = this->gpsAgent->gd->time >>  8;
+    gpsData[2] = this->gpsAgent->gd->time >> 16;
+    gpsData[3] = this->gpsAgent->gd->time >> 24;
+    motionCharacteristic->setValue(gpsData, 21);
 
 }

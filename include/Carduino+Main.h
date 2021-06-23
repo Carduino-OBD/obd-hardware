@@ -3,7 +3,9 @@
 #include <FreematicsPlus.h>
 #include "Carduino+Bluetooth.h"
 #include "Carduino+GPS.h"
+#include "Carduino+Device.h"
 #include "Carduino+Accelerometer.h"
+#include "Carduino+Motion.h"
 
 class Carduino_Main {
 
@@ -20,7 +22,9 @@ public:
 private:
     Carduino_Bluetooth *bluetoothAgent;
     Carduino_GPS *gpsAgent;
+    Carduino_Device *deviceAgent;
     Carduino_Accelerometer *accelerometerAgent;
+    Carduino_Motion *motionAgent;
 };
 
 #endif

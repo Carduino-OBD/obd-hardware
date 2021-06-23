@@ -10,10 +10,6 @@
 GPS_DATA *gd = 0;
 uint32_t lastGPStime = 0;
 
-float acc[3] = {0};
-float gyr[3] = {0};
-float mag[3] = {0};
-ORIENTATION ori = {0};
 
 long parseDegree(const char *s) {
     char *p;
@@ -136,34 +132,6 @@ void logLocationData(GPS_DATA *gd) {
     lastGPStime = gd->time;
 }
 
-void Carduino_GPS::processGPSData() {
-    // issue the command to get parsed GPS data
-    if (this->sys->gpsGetData(&gd) ) {
-        logLocationData(gd);
-    } else {
-        Serial.println("No GPS data");
-    }
-}
-// void Carduino_GPS::waitGPS() {
-//     int elapsed = 0;
-//     for (uint32_t t = millis(); millis() - t < 500;) {
-//         int t1 = (millis() - t) / 1000;
-//         if (t1 != elapsed) {
-//             Serial.print("Waiting for GPS (");
-//             Serial.print(elapsed);
-//             Serial.println(")");
-//             elapsed = t1;
-//         }
-//         // read parsed GPS data
-//         if (this->sys->gpsGetData(&gd) && gd->sat != 0 && gd->sat != 255) {
-//             Serial.print("Sats:");
-//             Serial.println(gd->sat);
-//             break;
-//         }
-//     }
-// }
-
-
 /**
  * Create an instance of the GPS manager
  */
@@ -180,28 +148,12 @@ Carduino_GPS::Carduino_GPS(FreematicsESP32 *sysArg) {
         Serial.println("NO");
     }
 
-
-    // Serial.print("CELL GPS:");
-    // if (cellInit()) {
-    //     Serial.println("OK");
-    //     if (!gd) gd = new GPS_DATA;
-    //     memset(gd, 0, sizeof(GPS_DATA));
-    // } else {
-    //     Serial.println("NO");
-    // }
-
-
-    /*
-    ",\"gps\":{\"date\":%u,\"time\":%u,\"lat\":%f,\"lng\":%f,\"alt\":%f,\"speed\":%f,\"sat\":%u,\"sentences\":%u,\"errors\":%u}",
-            gd->date, gd->time, gd->lat, gd->lng, gd->alt, gd->speed, gd->sat,
-            gd->sentences, gd->errors
-     */
-
     Serial.println("GPS initialized");
 }
 
 
 void Carduino_GPS::runLoop(void) {
     // this->cellGetGPSInfo(gd);
-    this->processGPSData();
+    this->sys->gpsGetData(&gd);
+    logLocationData(gd);
 }

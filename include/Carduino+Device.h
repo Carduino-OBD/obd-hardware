@@ -1,25 +1,22 @@
-#ifndef _CARDUINO_GPS_H
-#define _CARDUINO_GPS_H
+#ifndef _CARDUINO_DEVICE_H
+#define _CARDUINO_DEVICE_H
 #include <FreematicsPlus.h>
 
-class Carduino_GPS {
+class Carduino_Device {
 
 public:
     /**
-     * Create an instance of the GPS manager
+     * Create an instance of the Device manager
      */
-    Carduino_GPS(FreematicsESP32 *sysArg);
+    Carduino_Device(FreematicsESP32 *sysArg);
 
     /**
      * Called every iteration of the arduino run loop
      */
     void runLoop(void);
 
-    GPS_DATA *gd;
-
 private:
     FreematicsESP32 *sys;
-
 
 };
 #endif
