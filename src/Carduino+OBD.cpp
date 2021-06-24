@@ -1,7 +1,8 @@
 #include <Arduino.h>
 
-#include <FreematicsMEMS.h>
+#include <FreematicsPlus.h>
 #include "Carduino+OBD.h"
+#define OBD_RECV_BUF_SIZE 80
 
 COBD obd;
 bool connected = false;
@@ -13,11 +14,12 @@ unsigned long count = 0;
 Carduino_OBD::Carduino_OBD(FreematicsESP32 *sysArg) {
     Serial.println("Initializing OBD unit...");
 
-    // initializations
-    while (!sys.begin());
-    obd.begin(sys.link);
+    Serial.print("TYPE:");
+    Serial.println(sysArg->devType);
+    obd.begin(sysArg->link);
+    Serial.println(" OBD initialized");
 
-    Serial.println("OBD unit initialized");
+
 }
 
 
@@ -55,10 +57,10 @@ void Carduino_OBD::runLoop(void) {
     Serial.print(readChipTemperature());
 
     Serial.print(" VIN: ");
-    char[OBD_RECV_BUF_SIZE + 1] vinBuffer;
-    obd.getVin(vinBuffer, OBD_RECV_BUF_SIZE);
-    char[OBD_RECV_BUF_SIZE] = 0;
-    Serial.print(vinBuffer)
+    char vinBuffer[OBD_RECV_BUF_SIZE + 1];
+    obd.getVIN(vinBuffer, OBD_RECV_BUF_SIZE);
+    vinBuffer[OBD_RECV_BUF_SIZE] = 0;
+    Serial.print(vinBuffer);
     Serial.println();
     if (obd.errors > 2) {
         Serial.println("OBD disconnected");
