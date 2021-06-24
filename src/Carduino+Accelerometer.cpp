@@ -93,12 +93,12 @@ void Carduino_Accelerometer::runLoop(void) {
     bool updated;
     updated = mems->read(acc, gyr, mag, 0, &ori);
     if (updated) {
-        Serial.print("Orientation: ");
-        Serial.print(ori.yaw, 2);
-        Serial.print(' ');
-        Serial.print(ori.pitch, 2);
-        Serial.print(' ');
-        Serial.println(ori.roll, 2);
+        // Serial.print("Orientation: ");
+        // Serial.print(ori.yaw, 2);
+        // Serial.print(' ');
+        // Serial.print(ori.pitch, 2);
+        // Serial.print(' ');
+        // Serial.println(ori.roll, 2);
         // store.log(PID_ACC, (int16_t)(acc[0] * 100), (int16_t)(acc[1] * 100),
         //           (int16_t)(acc[2] * 100));
         // store.log(PID_GYRO, (int16_t)(gyr[0] * 100), (int16_t)(gyr[1] * 100),

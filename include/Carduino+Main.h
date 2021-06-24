@@ -6,6 +6,7 @@
 #include "Carduino+Device.h"
 #include "Carduino+Accelerometer.h"
 #include "Carduino+Motion.h"
+#include "Carduino+OBD.h"
 
 class Carduino_Main {
 
@@ -25,6 +26,7 @@ private:
     Carduino_Device *deviceAgent;
     Carduino_Accelerometer *accelerometerAgent;
     Carduino_Motion *motionAgent;
+    Carduino_OBD *obdAgent;
 };
 
 #endif

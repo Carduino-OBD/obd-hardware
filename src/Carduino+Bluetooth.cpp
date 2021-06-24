@@ -114,6 +114,26 @@ void Carduino_Bluetooth::runLoop(void) {
     gpsData[1] = this->gpsAgent->gd->time >>  8;
     gpsData[2] = this->gpsAgent->gd->time >> 16;
     gpsData[3] = this->gpsAgent->gd->time >> 24;
+
+    gpsData[4] = 0;
+    gpsData[5] = 0;
+    gpsData[6] = 0;
+    gpsData[7] = 0;
+    gpsData[8] = 0;
+    gpsData[9] = 0;
+    gpsData[10] = 0;
+    gpsData[11] = 0;
+    gpsData[12] = 0;
+    gpsData[13] = 0;
+    gpsData[14] = 0;
+    gpsData[15] = 0;
+    gpsData[16] = 0;
+    gpsData[17] = 0;
+    gpsData[18] = 0;
+    gpsData[19] = 0;
+    gpsData[20] = 0;
+
+
     motionCharacteristic->setValue(gpsData, 21);
 
 }

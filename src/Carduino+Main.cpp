@@ -17,6 +17,7 @@ Carduino_Main::Carduino_Main() {
     this->gpsAgent = new Carduino_GPS(&sys);
     this->motionAgent = new Carduino_Motion(this->gpsAgent,
                                             this->accelerometerAgent);
+    this->obdAgent = new Carduino_OBD(&sys);
     this->bluetoothAgent = new Carduino_Bluetooth(this->gpsAgent);
     Serial.println("Done initializing");
 }
@@ -30,6 +31,7 @@ void Carduino_Main::runLoop(void) {
     this->gpsAgent->runLoop();
     this->deviceAgent->runLoop();
     this->motionAgent->runLoop();
+    this->obdAgent->runLoop();
     this->bluetoothAgent->runLoop();
 
 }
