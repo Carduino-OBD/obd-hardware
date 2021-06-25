@@ -14,6 +14,11 @@ public:
      * Called every iteration of the arduino run loop
      */
     void runLoop(void);
+
+    float getMotion();
+private:
+    float accel[3];
+    float motion;
 };
 
 #endif

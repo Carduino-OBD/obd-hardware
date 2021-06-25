@@ -8,7 +8,6 @@
 #define ENABLE_ORIENTATION 1
 
 float accBias[3];
-float acc[3] = {0};
 float gyr[3] = {0};
 float mag[3] = {0};
 ORIENTATION ori = {0};
@@ -32,34 +31,11 @@ void calibrateMEMS() {
         accBias[0] += acc[0];
         accBias[1] += acc[1];
         accBias[2] += acc[2];
-        delay(10);
+        delay(1);
     }
     accBias[0] /= n;
     accBias[1] /= n;
     accBias[2] /= n;
-    Serial.print("ACC Bias:");
-    Serial.print(accBias[0]);
-    Serial.print('/');
-    Serial.print(accBias[1]);
-    Serial.print('/');
-    Serial.println(accBias[2]);
-}
-
-void standy() {
-    if (checkState(STATE_MEMS_READY)) {
-        calibrateMEMS();
-        while (checkState(STATE_STANDBY)) {
-            // calculate relative movement
-            float motion = 0;
-            for (byte n = 0; n < 10; n++) {
-                mems->read(acc);
-                for (byte i = 0; i < 3; i++) {
-                    float m = (acc[i] - accBias[i]);
-                    motion += m * m;
-                }
-            }
-        }
-    }
 }
 
 /**
@@ -90,30 +66,21 @@ Carduino_Accelerometer::Carduino_Accelerometer() {
 
 
 void Carduino_Accelerometer::runLoop(void) {
-    bool updated;
-    updated = mems->read(acc, gyr, mag, 0, &ori);
-    if (updated) {
-        return;
-        Serial.print("Accel (x,y,z): ");
-        Serial.print(acc[0] * 100, 2);
-        Serial.print(' ');
-        Serial.print(acc[1] * 100, 2);
-        Serial.print(' ');
-        Serial.println(acc[2] * 100, 2);
-        // store.log(PID_ACC, (int16_t)(acc[0] * 100), (int16_t)(acc[1] * 100),
-        //           (int16_t)(acc[2] * 100));
-        // store.log(PID_GYRO, (int16_t)(gyr[0] * 100), (int16_t)(gyr[1] * 100),
-        //           (int16_t)(gyr[2] * 100));
-        // store.log(PID_ORIENTATION, (int16_t)(ori.yaw * 100), (int16_t)(ori.pitch * 100),
-        //           (int16_t)(ori.roll * 100));
-        // }
-        // updated = mems->read(acc, gyr, mag);
-        // if (updated) {
-        //     // store.log(PID_ACC, (int16_t)(acc[0] * 100), (int16_t)(acc[1] * 100),
-        //     //           (int16_t)(acc[2] * 100));
-        //     // store.log(PID_GYRO, (int16_t)(gyr[0] * 100), (int16_t)(gyr[1] * 100),
-        //     //           (int16_t)(gyr[2] * 100));
-        // }
+    mems->read(this->accel, gyr, mag, 0, &ori);
 
+    calibrateMEMS();
+    float motion = 0;
+    for (byte n = 0; n < 10; n++) {
+        mems->read(this->accel);
+        for (byte i = 0; i < 3; i++) {
+            float m = (this->accel[i] - accBias[i]);
+            motion += m * m;
+        }
     }
+    this->motion = motion;
+
+}
+
+float Carduino_Accelerometer::getMotion() {
+    return this->motion;
 }

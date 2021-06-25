@@ -78,8 +78,9 @@ void Carduino_DriveManager::runLoop(void) {
     std::stringstream ss;
     ss << timeBuf << " " << dateBuf << " +0";
     strptime(ss.str().c_str(), "%H:%M:%S %d/%m/%y %z", &tm);
-    Serial.println(ss.str().c_str());
     std::time_t time = timegm(&tm);
+
+
     return;
 
     //millis() rolls over after 50 days so take the abs
@@ -100,7 +101,7 @@ void Carduino_DriveManager::runLoop(void) {
         lastSaveTime = millis();
     }
 
-    if(!this->obdUnit->isConnected() && !hasSaved) {
+    if(!this->obdUnit->isConnected() && !hasSaved && hasConnected) {
         Serial.println("Attempting save");
         logger.init();
         int fileid = logger.begin("name");

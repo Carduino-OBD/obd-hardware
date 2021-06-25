@@ -15,7 +15,7 @@ Carduino_Main::Carduino_Main() {
     this->accelerometerAgent = new Carduino_Accelerometer();
     this->deviceAgent = new Carduino_Device(&sys);
     this->gpsAgent = new Carduino_GPS(&sys);
-    this->obdAgent = new Carduino_OBD(&sys);
+    this->obdAgent = new Carduino_OBD(&sys, this->accelerometerAgent);
     this->bluetoothAgent = new Carduino_Bluetooth(this->gpsAgent);
     this->driveAgent = new Carduino_DriveManager(this->gpsAgent,
             this->accelerometerAgent, this->obdAgent);
