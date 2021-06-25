@@ -116,6 +116,14 @@ void logLocationData(GPS_DATA *gd) {
             '0' + (gd->time % 100) / 10);
     Serial.print(buf);
 
+    Serial.print(" Time: ");
+    Serial.print(gd->time);
+
+    Serial.print(" Date: ");
+    Serial.print(gd->date);
+    Serial.print(' ');
+
+
     Serial.print(' ');
     Serial.print(gd->lat, 6);
     Serial.print(' ');

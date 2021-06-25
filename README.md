@@ -13,8 +13,8 @@ This assumes a macOS and Sublime Text development based environment. Termius mus
 
 Alternatively, the project can be run from the command line via:
 ```bash
-pio -c sublimetext run -t monitor
+pio run -t monitor -t upload
 ```
 
 ## Usage
-The program assumes you have a Freematics ONE+ Model A with both a SIM card and MicroSD card installed.
+The program assumes you have a Freematics ONE+ Model A with a MicroSD card installed.

@@ -5,7 +5,6 @@
 #define OBD_RECV_BUF_SIZE 80
 
 COBD obd;
-bool connected = false;
 unsigned long count = 0;
 
 /**
@@ -17,18 +16,22 @@ Carduino_OBD::Carduino_OBD(FreematicsESP32 *sysArg) {
     Serial.print("TYPE:");
     Serial.println(sysArg->devType);
     obd.begin(sysArg->link);
+
+    this->connected = false;
     Serial.println(" OBD initialized");
+
+
 
 
 }
 
 
 void Carduino_OBD::runLoop(void) {
-    if (!connected) {
+    if (!this->connected) {
         Serial.print("Connecting to OBD...");
         if (obd.init()) {
             Serial.println("OK");
-            connected = true;
+            this->connected = true;
         } else {
             Serial.println();
         }
@@ -36,35 +39,41 @@ void Carduino_OBD::runLoop(void) {
     }
 
     int value;
-    Serial.print('[');
-    Serial.print(millis());
-    Serial.print("] #");
-    Serial.print(count++);
+    // Serial.print('[');
+    // Serial.print(millis());
+    // Serial.print("] #");
+    // Serial.print(count++);
+    obd.readPID(PID_RPM, value);
     if (obd.readPID(PID_RPM, value)) {
-        Serial.print(" RPM:");
-        Serial.print(value);
+        // Serial.print(" RPM:");
+        // Serial.print(value);
     }
+    obd.readPID(PID_SPEED, value);
     if (obd.readPID(PID_SPEED, value)) {
-        Serial.print(" SPEED:");
-        Serial.print(value);
+        // Serial.print(" SPEED:");
+        // Serial.print(value);
     }
+    obd.getVoltage();
+    // Serial.print(" BATTERY:");
+    // Serial.print(obd.getVoltage());
+    // Serial.print('V');
 
-    Serial.print(" BATTERY:");
-    Serial.print(obd.getVoltage());
-    Serial.print('V');
+    // Serial.print(" CPU TEMP:");
+    // Serial.print(readChipTemperature());
 
-    Serial.print(" CPU TEMP:");
-    Serial.print(readChipTemperature());
-
-    Serial.print(" VIN: ");
-    char vinBuffer[OBD_RECV_BUF_SIZE + 1];
-    obd.getVIN(vinBuffer, OBD_RECV_BUF_SIZE);
-    vinBuffer[OBD_RECV_BUF_SIZE] = 0;
-    Serial.print(vinBuffer);
-    Serial.println();
+    // Serial.print(" VIN: ");
+    // char vinBuffer[OBD_RECV_BUF_SIZE + 1];
+    // obd.getVIN(vinBuffer, OBD_RECV_BUF_SIZE);
+    // vinBuffer[OBD_RECV_BUF_SIZE] = 0;
+    // Serial.print(vinBuffer);
+    // Serial.println();
     if (obd.errors > 2) {
         Serial.println("OBD disconnected");
-        connected = false;
+        this->connected = false;
         obd.reset();
     }
+}
+
+bool Carduino_OBD::isConnected() {
+    return this->connected;
 }

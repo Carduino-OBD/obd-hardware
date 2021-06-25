@@ -93,6 +93,7 @@ void Carduino_Accelerometer::runLoop(void) {
     bool updated;
     updated = mems->read(acc, gyr, mag, 0, &ori);
     if (updated) {
+        return;
         Serial.print("Accel (x,y,z): ");
         Serial.print(acc[0] * 100, 2);
         Serial.print(' ');

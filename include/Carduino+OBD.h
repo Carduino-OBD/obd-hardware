@@ -14,5 +14,12 @@ public:
      * Called every iteration of the arduino run loop
      */
     void runLoop(void);
+
+
+    bool isConnected();
+private:
+    bool connected;
 };
+
+
 #endif
