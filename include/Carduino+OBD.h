@@ -3,6 +3,8 @@
 #include <FreematicsPlus.h>
 #include "Carduino+Accelerometer.h"
 
+#define OBD_RECV_BUF_SIZE 80
+
 class Carduino_OBD {
 
 public:
@@ -19,9 +21,14 @@ public:
 
 
     bool isConnected();
+
+    char vinBuffer[OBD_RECV_BUF_SIZE + 1];
+
+    uint8_t getVehicleSpeed();
 private:
     Carduino_Accelerometer *accelerometerUnit;
     bool connected;
+    uint8_t vehicleSpeed;
 };
 
 

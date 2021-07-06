@@ -45,7 +45,7 @@ public:
     virtual uint16_t samples() {
         return m_samples;
     }
-    virtual void dispatch(const char *buf, byte len) {
+    virtual void dispatch(const char *buf, size_t len) {
         // output data via serial
         Serial.write((uint8_t *)buf, len);
         Serial.write(' ');
@@ -89,7 +89,7 @@ public:
     char *buffer() {
         return m_cache;
     }
-    void dispatch(const char *buf, byte len) {
+    void dispatch(const char *buf, size_t len) {
         // reserve some space for checksum
         int remain = m_cacheSize - m_cacheBytes - len - 3;
         if (remain < 0) {
@@ -129,7 +129,7 @@ public:
     FileLogger() {
         m_delimiter = ',';
     }
-    virtual void dispatch(const char *buf, byte len) {
+    virtual void dispatch(const char *buf, size_t len) {
         if(!open) return;
 
         if (m_file.write((uint8_t *)buf, len) != len) {

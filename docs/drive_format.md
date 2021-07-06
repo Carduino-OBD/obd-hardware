@@ -4,36 +4,38 @@ All drives are stored in a custom binary format to save space. The header will a
 ## Version 1:
 ## Packet format
 ```
-|------Header------|------n drive frames------|------final drive frames (all bits set to 1)------|------Footer------|
-      20 bytes          n frames * 67 bytes                         67 bytes  							1 byte
+|------Header------|------Polyline------|------drive frames------|------Footer------|
+      28 bytes 	  int8_t*Polyline Size  n frames * 14 bytes         1 byte
 ```
 
 ### Header:
 ```
-|------Version------|------VIN------|------Fuel tank level------|
-      uint16_t          int8_t * 17             uint8_t
+|------Version------|------VIN------|------Fuel tank level------|------Polyline Size------|------Drive Frame Size------|
+      uint16_t          int8_t * 17             uint8_t		      uint32_t			        uint32_t
 ```
 - Version: 16 bit unsigned integer to allow clients to correctly parse the data
-- VIN: A 17 character ascii string representing the vehicle VIN
+- VIN: A 17 character ascii string representing the vehicle VIN. **Not** null terminated
 - Fuel tank level: 8 bit unsigned integer representing the vehicle fuel tank level at the start of the drive, a percentage between 0 and 100 (inclusive)
+- Polyline Size: The length of the polyline string. Each element of the polyline string is int8_t
+- Drive Frame Size: The size of the drive frame buffer. Each frame is divided into 14 bytes, so n_frames = drive frame size / 14
+
 
 ### Drive frame:
-Each frame represents the vehicle state at a particular point in time. The final drive frame will have all bits set to 1 and is considered a stop frame and is therefore invalid.
+Each frame represents the vehicle state at a particular point in time.
 ```
-|-----GPS Time-----|-----GPS Speed-----|-----Latitutde-----|-----Longitude-----|-----Heading-----|-----Altitude-----|-----AccelX-----|-----AccelY-----|-----AccelZ-----|-----Vehicle Speed-----|
-      uint64_t		  float (4 byte)      float (4 byte)       float (4 byte)       uint16_t       float (4 byte)    float (4 byte)    float (4 byte)   float (4 byte)        uint8_t
+|-----GPS Time-----|-----GPS Speed-----|-----Heading-----|-----Altitude-----|-----Vehicle Speed-----|
+      uint64_t		    uint8_t              int16_t          int16_t              uint8_t
 ```
 - GPS Time: a 64 bit unsigned integer representing the unix time of the data frame
 - GPS Speed: a 64 bit float representing the GPS speed in km/h
-- GPS latitude: a 64 bit float representing the GPS latitude
-- GPS longtitude: a 64 bit float representing the GPS longitude
 - GPS heading: a 16 bit unsigned integer representing the GPS heading
 - GPS altitude: a 64 bit float representing the GPS heading
-- AccelX: a 64 bit float representing the acceleration of the device in the x axis
-- AccelY: a 64 bit float representing the acceleration of the device in the y axis
-- AccelZ: a 64 bit float representing the acceleration of the device in the z axis
 - Vehicle Speed: an 8 bit unsigned integer representing the vehicle speed as reported by OBD
 
+
+### Polyline data:
+To save space, all longitude and latitude data is compressed with the polyline encoding format as a base64 string. Every drive frame will have a corresponding lat/long.
+The polyline string is **not** null terminated and the size must be determined with the polyline size information.
 
 ## Footer:
 ```

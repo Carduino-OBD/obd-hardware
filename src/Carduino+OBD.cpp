@@ -2,8 +2,7 @@
 
 #include <FreematicsPlus.h>
 #include "Carduino+OBD.h"
-#define OBD_RECV_BUF_SIZE 80
-#define JUMPSTART_VOLTAGE 14
+#define RUNNING_VOLTAGE 14
 
 COBD obd;
 unsigned long count = 0;
@@ -39,12 +38,13 @@ Carduino_OBD::Carduino_OBD(FreematicsESP32 *sysArg,
 void Carduino_OBD::runLoop(void) {
     const float motionThreshold = 0.2;
     if(inLowPowerMode && this->accelerometerUnit->getMotion() < motionThreshold
-            && obd.getVoltage() < JUMPSTART_VOLTAGE) {
-        delay(500);
+            && obd.getVoltage() < RUNNING_VOLTAGE) {
+        pinMode(PIN_LED, HIGH);
+        //delay(5000);
         return;
     } else if (!this->connected
                && this->accelerometerUnit->getMotion() < motionThreshold
-               && obd.getVoltage() < JUMPSTART_VOLTAGE && !inLowPowerMode) {
+               && obd.getVoltage() < RUNNING_VOLTAGE && !inLowPowerMode) {
         Serial.println("OBD not connected and motion below threshold, low power");
         inLowPowerMode = true;
         obd.enterLowPowerMode();
@@ -74,6 +74,7 @@ void Carduino_OBD::runLoop(void) {
     }
     obd.readPID(PID_SPEED, value);
     if (obd.readPID(PID_SPEED, value)) {
+        this->vehicleSpeed = value;
         // Serial.print(" SPEED:");
         // Serial.print(value);
     }
@@ -86,9 +87,9 @@ void Carduino_OBD::runLoop(void) {
     // Serial.print(readChipTemperature());
 
     // Serial.print(" VIN: ");
-    // char vinBuffer[OBD_RECV_BUF_SIZE + 1];
-    // obd.getVIN(vinBuffer, OBD_RECV_BUF_SIZE);
-    // vinBuffer[OBD_RECV_BUF_SIZE] = 0;
+
+    obd.getVIN(vinBuffer, OBD_RECV_BUF_SIZE);
+    vinBuffer[OBD_RECV_BUF_SIZE] = 0;
     // Serial.print(vinBuffer);
     // Serial.println();
     if (obd.errors > 2) {
@@ -96,6 +97,10 @@ void Carduino_OBD::runLoop(void) {
         this->connected = false;
         obd.reset();
     }
+}
+
+uint8_t Carduino_OBD::getVehicleSpeed() {
+    return this->vehicleSpeed;
 }
 
 bool Carduino_OBD::isConnected() {

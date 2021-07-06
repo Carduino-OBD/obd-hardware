@@ -7,7 +7,7 @@
 
 #include <FreematicsPlus.h>
 #include "Carduino+DriveManager.h"
-#include "polylineencoder.h"
+#include "Carduino+Drive.h"
 #define OBD_RECV_BUF_SIZE 80
 
 
@@ -56,32 +56,14 @@ Carduino_DriveManager::Carduino_DriveManager(Carduino_GPS *gpsUnit,
 
 unsigned long lastSaveTime = 0;
 uint32_t lastGPSSavetime = 0;
-
-gepaf::PolylineEncoder<> encoder;
 SDLogger logger;
 
 bool hasSaved = false;
 bool hasConnected = false;
 
+Carduino_Drive *currentDrive = NULL;
+
 void Carduino_DriveManager::runLoop(void) {
-
-    char timeBuf[32];
-    sprintf(timeBuf, "%02u:%02u:%02u",
-            this->gpsUnit->gd->time / 1000000, (this->gpsUnit->gd->time % 1000000) / 10000,
-            (this->gpsUnit->gd->time % 10000) / 100);
-
-    char dateBuf[32];
-    sprintf(dateBuf, "%02u/%02u/%02u", (this->gpsUnit->gd->date % 1000000) / 10000,
-            (this->gpsUnit->gd->date % 10000) / 100, this->gpsUnit->gd->date % 100);
-
-    struct std::tm tm;
-    std::stringstream ss;
-    ss << timeBuf << " " << dateBuf << " +0";
-    strptime(ss.str().c_str(), "%H:%M:%S %d/%m/%y %z", &tm);
-    std::time_t time = timegm(&tm);
-
-
-    return;
 
     //millis() rolls over after 50 days so take the abs
     if(abs(millis() - lastSaveTime) > 7000 && this->obdUnit->isConnected()) {
@@ -93,10 +75,47 @@ void Carduino_DriveManager::runLoop(void) {
             Serial.println(" No GPS, returning");
             return;
         }
+
+        if (this->gpsUnit->gd->lat == 0 || this->gpsUnit->gd->lng == 0) {
+            Serial.println(" GPS coordinates 0, returning");
+            return;
+        }
+
+        char timeBuf[32];
+        sprintf(timeBuf, "%02u:%02u:%02u",
+                this->gpsUnit->gd->time / 1000000, (this->gpsUnit->gd->time % 1000000) / 10000,
+                (this->gpsUnit->gd->time % 10000) / 100);
+
+        char dateBuf[32];
+        sprintf(dateBuf, "%02u/%02u/%02u", (this->gpsUnit->gd->date % 1000000) / 10000,
+                (this->gpsUnit->gd->date % 10000) / 100, this->gpsUnit->gd->date % 100);
+
+        struct std::tm tm;
+        std::stringstream ss;
+        ss << timeBuf << " " << dateBuf << " +0";
+        strptime(ss.str().c_str(), "%H:%M:%S %d/%m/%y %z", &tm);
+        std::time_t time = timegm(&tm);
+
+        if(currentDrive == NULL) {
+            //TODO: Get the actual fuel level
+            currentDrive = new Carduino_Drive(this->obdUnit->vinBuffer, 100,
+                                              time);
+        }
+
         hasSaved = false;
         lastGPSSavetime = this->gpsUnit->gd->time;
 
-        encoder.addPoint(this->gpsUnit->gd->lat, this->gpsUnit->gd->lng);
+        /*
+            void addFrame(uint32_t time, uint8_t gpsSpeed, int32_t latitude,
+                  int32_t longitude,
+                  int16_t heading, int16_t altitude,
+                  uint8_t vehicleSpeed);
+         */
+
+        //TODO: get actual vehicle speed
+        currentDrive->addFrame(time, this->gpsUnit->gd->speed * 1852 / 1000,
+                               this->gpsUnit->gd->lat, this->gpsUnit->gd->lng, this->gpsUnit->gd->heading,
+                               this->gpsUnit->gd->alt, this->obdUnit->getVehicleSpeed());
 
         lastSaveTime = millis();
     }
@@ -104,16 +123,31 @@ void Carduino_DriveManager::runLoop(void) {
     if(!this->obdUnit->isConnected() && !hasSaved && hasConnected) {
         Serial.println("Attempting save");
         logger.init();
-        int fileid = logger.begin("name");
 
-        std::string res = encoder.encode();
-        encoder.clear();
+        char fileName[15];
+        sprintf(fileName, "%10lu.cdu", currentDrive->startTime);
 
-        logger.dispatch(res.c_str(), res.length());
+        int fileid = logger.begin(fileName);
+
+        int8_t *buffer;
+        size_t bufferSize;
+        //TODO: Get actual fuel level
+        currentDrive->getDriveData(&buffer, &bufferSize, 50);
+
+        Serial.print("Final Buffer size: ");
+        Serial.print(bufferSize);
+        Serial.println();
+
+        logger.dispatch((const char *)buffer, bufferSize);
         logger.flush();
         logger.end();
+
+        free(buffer);
+
         hasConnected = false;
         hasSaved = true;
+
+        currentDrive = NULL;
     }
 
 }
