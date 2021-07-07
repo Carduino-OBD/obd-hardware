@@ -22,8 +22,8 @@ Carduino_Drive::~Carduino_Drive() {
     free(this->buffer);
 }
 
-void Carduino_Drive::addFrame(time_t time, uint8_t gpsSpeed, int32_t latitude,
-                              int32_t longitude,
+void Carduino_Drive::addFrame(time_t time, uint8_t gpsSpeed, double latitude,
+                              double longitude,
                               int16_t heading, int16_t altitude,
                               uint8_t vehicleSpeed) {
     this->encoder.addPoint(latitude, longitude);
@@ -39,14 +39,15 @@ void Carduino_Drive::addFrame(time_t time, uint8_t gpsSpeed, int32_t latitude,
         this->bufferCapacity = newCapacity;
     }
 
-    this->buffer[this->bufferSize + 0] = (uint8_t)(time & 0xff);
-    this->buffer[this->bufferSize + 1] = (uint8_t)(time >> 8) & 0xff;
-    this->buffer[this->bufferSize + 2] = (uint8_t)(time >> 16) & 0xff;
-    this->buffer[this->bufferSize + 3] = (uint8_t)(time >> 24) & 0xff;
-    this->buffer[this->bufferSize + 4] = (uint8_t)(time >> 32) & 0xff;
-    this->buffer[this->bufferSize + 5] = (uint8_t)(time >> 40) & 0xff;
-    this->buffer[this->bufferSize + 6] = (uint8_t)(time >> 48) & 0xff;
-    this->buffer[this->bufferSize + 7] = (uint8_t)(time >> 56) & 0xff;
+    for (int i = 0; i < 8; i++) {
+        if(i >= sizeof(time)) {
+            this->buffer[this->bufferSize + i] = 0;
+        } else {
+            this->buffer[this->bufferSize + i] = (uint8_t)(time >> (i * 8)) & 0xff;
+        }
+
+
+    }
 
     this->buffer[this->bufferSize + 8] = gpsSpeed;
 
@@ -61,8 +62,11 @@ void Carduino_Drive::addFrame(time_t time, uint8_t gpsSpeed, int32_t latitude,
     this->bufferSize += DRIVE_FRAME_SIZE;
 
 
-    Serial.print("Buffer size: ");
-    Serial.print(bufferSize);
+    Serial.print(" (");
+    Serial.print(latitude);
+    Serial.print(",");
+    Serial.print(longitude);
+    Serial.print(")");
     Serial.println();
 
 }
@@ -78,11 +82,6 @@ void Carduino_Drive::getDriveData(int8_t **data, size_t *size,
 
     *data = (int8_t *)(malloc(dataSize));
     *size = dataSize;
-
-
-    Serial.print("data size: ");
-    Serial.print(dataSize);
-    Serial.println();
 
     data[0][0] = (uint8_t)(VERSION & 0xff);
     data[0][1] = (uint8_t)(VERSION >> 8);

@@ -134,10 +134,6 @@ void Carduino_DriveManager::runLoop(void) {
         //TODO: Get actual fuel level
         currentDrive->getDriveData(&buffer, &bufferSize, 50);
 
-        Serial.print("Final Buffer size: ");
-        Serial.print(bufferSize);
-        Serial.println();
-
         logger.dispatch((const char *)buffer, bufferSize);
         logger.flush();
         logger.end();

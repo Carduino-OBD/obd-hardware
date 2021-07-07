@@ -27,10 +27,10 @@ Each frame represents the vehicle state at a particular point in time.
       uint64_t		    uint8_t              int16_t          int16_t              uint8_t
 ```
 - GPS Time: a 64 bit unsigned integer representing the unix time of the data frame
-- GPS Speed: a 64 bit float representing the GPS speed in km/h
-- GPS heading: a 16 bit unsigned integer representing the GPS heading
-- GPS altitude: a 64 bit float representing the GPS heading
-- Vehicle Speed: an 8 bit unsigned integer representing the vehicle speed as reported by OBD
+- GPS Speed: an 8 bit unsigned integer representing the GPS speed in km/h
+- GPS heading: a 16 bit signed integer representing the GPS heading
+- GPS altitude: a 16 bit signed representing the GPS heading
+- Vehicle Speed: an 8 bit unsigned integer representing the vehicle speed as reported by OBD in km/h
 
 
 ### Polyline data:

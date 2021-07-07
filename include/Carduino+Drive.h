@@ -16,8 +16,8 @@ public:
      */
     ~Carduino_Drive();
 
-    void addFrame(time_t time, uint8_t gpsSpeed, int32_t latitude,
-                  int32_t longitude,
+    void addFrame(time_t time, uint8_t gpsSpeed, double latitude,
+                  double longitude,
                   int16_t heading, int16_t altitude,
                   uint8_t vehicleSpeed);
 

@@ -48,7 +48,6 @@ public:
     virtual void dispatch(const char *buf, size_t len) {
         // output data via serial
         Serial.write((uint8_t *)buf, len);
-        Serial.write(' ');
         m_samples++;
     }
 protected:
@@ -99,7 +98,6 @@ public:
         // store data in m_cache
         memcpy(m_cache + m_cacheBytes, buf, len);
         m_cacheBytes += len;
-        m_cache[m_cacheBytes++] = ',';
         m_samples++;
     }
 
