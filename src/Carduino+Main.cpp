@@ -12,6 +12,13 @@ Carduino_Main::Carduino_Main() {
     sys.begin(1, 1);
     Serial.println("Initializing Carduino...");
 
+    uint64_t chipid = ESP.getEfuseMac(); // The chip ID is essentially its MAC address(length: 6 bytes).
+    uint16_t chip = (uint16_t)(chipid >> 32);
+
+    snprintf(this->serial, 22, "CARDUINO-%04X%08X", chip, (uint32_t)chipid);
+
+    Serial.printf("Serial number: %s\n", this->serial);
+
     this->accelerometerAgent = new Carduino_Accelerometer();
     this->deviceAgent = new Carduino_Device(&sys);
     this->gpsAgent = new Carduino_GPS(&sys);
@@ -26,7 +33,6 @@ Carduino_Main::Carduino_Main() {
  * Called every iteration of the arduino run loop
  */
 void Carduino_Main::runLoop(void) {
-
     this->accelerometerAgent->runLoop();
     this->gpsAgent->runLoop();
     this->deviceAgent->runLoop();

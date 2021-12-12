@@ -20,6 +20,9 @@ public:
      * Called every iteration of the arduino run loop
      */
     void runLoop(void);
+
+    char serial[22];
+
 private:
     Carduino_Bluetooth *bluetoothAgent;
     Carduino_GPS *gpsAgent;
