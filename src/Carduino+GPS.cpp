@@ -1,15 +1,13 @@
-#include <Arduino.h>
 #include "Carduino+GPS.h"
-#include <TinyGPS.h>
 #include "esp_task_wdt.h"
+#include <Arduino.h>
 #include <FreematicsPlus.h>
+#include <TinyGPS.h>
 
 #define GPS_SERIAL_BAUDRATE 115200L
 
-
 GPS_DATA *gd = 0;
 uint32_t lastGPStime = 0;
-
 
 long parseDegree(const char *s) {
     char *p;
@@ -24,7 +22,6 @@ long parseDegree(const char *s) {
     }
     return (left / 100) * 1000000 + tenk_minutes / 6;
 }
-
 
 // bool Carduino_GPS::cellSendCommand(const char *cmd, char *buf, int bufsize,
 //                                    const char *expected = "\r\nOK", unsigned int timeout = 1000) {
@@ -103,16 +100,15 @@ long parseDegree(const char *s) {
 //     return false;
 // }
 
-
 void logLocationData(GPS_DATA *gd) {
-    if (lastGPStime == gd->time) return;
+    if (lastGPStime == gd->time)
+        return;
     float kph = gd->speed * 1852 / 1000;
 
     Serial.print("[GPS] ");
 
     char buf[32];
-    sprintf(buf, "%02u:%02u:%02u.%c",
-            gd->time / 1000000, (gd->time % 1000000) / 10000, (gd->time % 10000) / 100,
+    sprintf(buf, "%02u:%02u:%02u.%c", gd->time / 1000000, (gd->time % 1000000) / 10000, (gd->time % 10000) / 100,
             '0' + (gd->time % 100) / 10);
     Serial.print(buf);
 
@@ -122,7 +118,6 @@ void logLocationData(GPS_DATA *gd) {
     Serial.print(" Date: ");
     Serial.print(gd->date);
     Serial.print(' ');
-
 
     Serial.print(' ');
     Serial.print(gd->lat, 6);
@@ -147,7 +142,6 @@ Carduino_GPS::Carduino_GPS(FreematicsESP32 *sysArg) {
     Serial.println("Initializing GPS...");
     this->sys = sysArg;
 
-
     Serial.print("GPS:");
     if (this->sys->gpsBegin(GPS_SERIAL_BAUDRATE)) {
         Serial.println("OK");
@@ -158,7 +152,6 @@ Carduino_GPS::Carduino_GPS(FreematicsESP32 *sysArg) {
 
     Serial.println("GPS initialized");
 }
-
 
 void Carduino_GPS::runLoop(void) {
     // this->cellGetGPSInfo(gd);

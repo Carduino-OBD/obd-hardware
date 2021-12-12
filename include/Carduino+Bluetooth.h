@@ -4,18 +4,18 @@
 
 class Carduino_Bluetooth {
 
-public:
+  public:
     /**
      * Create an instance of the bluetooth manager
      */
-    Carduino_Bluetooth(Carduino_GPS *gpsAgent);
+    Carduino_Bluetooth(Carduino_GPS *gpsAgent, char *serial);
 
     /**
      * Called every iteration of the arduino run loop
      */
     void runLoop(void);
 
-private:
+  private:
     Carduino_GPS *gpsAgent;
 };
 

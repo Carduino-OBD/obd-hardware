@@ -1,16 +1,16 @@
 #ifndef _CARDUINO_MAIN_H
 #define _CARDUINO_MAIN_H
-#include <FreematicsPlus.h>
-#include "Carduino+Bluetooth.h"
-#include "Carduino+GPS.h"
-#include "Carduino+Device.h"
 #include "Carduino+Accelerometer.h"
-#include "Carduino+OBD.h"
+#include "Carduino+Bluetooth.h"
+#include "Carduino+Device.h"
 #include "Carduino+DriveManager.h"
+#include "Carduino+GPS.h"
+#include "Carduino+OBD.h"
+#include <FreematicsPlus.h>
 
 class Carduino_Main {
 
-public:
+  public:
     /**
      * Create an instance of Carduino
      */
@@ -23,7 +23,7 @@ public:
 
     char serial[22];
 
-private:
+  private:
     Carduino_Bluetooth *bluetoothAgent;
     Carduino_GPS *gpsAgent;
     Carduino_Device *deviceAgent;

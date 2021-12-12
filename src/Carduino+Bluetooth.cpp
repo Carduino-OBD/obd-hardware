@@ -1,14 +1,14 @@
-#include <Arduino.h>
 #include "Carduino+Bluetooth.h"
+#include <Arduino.h>
 #include <BLEDevice.h>
-#include <BLEUtils.h>
 #include <BLEServer.h>
+#include <BLEUtils.h>
 
-#define SERVICE_UUID        "6a299733-725a-47fe-9df4-fa432b4c210c"
-#define MOTION_UUID         "d0ba1799-8dfe-4839-bb0f-f0bbb1756781"
-#define COMMAND_UUID        "847d333c-0a92-41f6-9027-ed2c2be47aa0"
+#define SERVICE_UUID "6a299733-725a-47fe-9df4-fa432b4c210c"
+#define MOTION_UUID "d0ba1799-8dfe-4839-bb0f-f0bbb1756781"
+#define COMMAND_UUID "847d333c-0a92-41f6-9027-ed2c2be47aa0"
 
-class MyCallbacks: public BLECharacteristicCallbacks {
+class MyCallbacks : public BLECharacteristicCallbacks {
     void onWrite(BLECharacteristic *commandCharacteristic) {
         std::string value = commandCharacteristic->getValue();
 
@@ -24,32 +24,38 @@ class MyCallbacks: public BLECharacteristicCallbacks {
     }
 };
 
+unsigned long hash(unsigned char *str) {
+    unsigned long hash = 5381;
+    int c;
+
+    while (c = *str++)
+        hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
+
+    return hash;
+}
+
 BLECharacteristic *motionCharacteristic;
 BLECharacteristic *commandCharacteristic;
 
 /**
  * Create an instance of the bluetooth manager
  */
-Carduino_Bluetooth::Carduino_Bluetooth(Carduino_GPS *gpsAgent) {
+Carduino_Bluetooth::Carduino_Bluetooth(Carduino_GPS *gpsAgent, char *serial) {
+
     Serial.println("Initializing Bluetooth...");
 
     this->gpsAgent = gpsAgent;
 
+    Serial.printf("Pairing code: %lu\n", hash((unsigned char *)serial));
 
     BLEDevice::init("Carduino");
     BLEServer *pServer = BLEDevice::createServer();
     BLEService *pService = pServer->createService(SERVICE_UUID);
 
-    motionCharacteristic = pService->createCharacteristic(
-                               MOTION_UUID,
-                               BLECharacteristic::PROPERTY_READ
-                           );
+    motionCharacteristic = pService->createCharacteristic(MOTION_UUID, BLECharacteristic::PROPERTY_READ);
 
-    commandCharacteristic = pService->createCharacteristic(
-                                COMMAND_UUID,
-                                BLECharacteristic::PROPERTY_READ |
-                                BLECharacteristic::PROPERTY_WRITE
-                            );
+    commandCharacteristic = pService->createCharacteristic(COMMAND_UUID, BLECharacteristic::PROPERTY_READ |
+                                                                             BLECharacteristic::PROPERTY_WRITE);
 
     commandCharacteristic->setCallbacks(new MyCallbacks());
 
@@ -58,13 +64,11 @@ Carduino_Bluetooth::Carduino_Bluetooth(Carduino_GPS *gpsAgent) {
     BLEAdvertising *pAdvertising = BLEDevice::getAdvertising();
     pAdvertising->addServiceUUID(SERVICE_UUID);
     pAdvertising->setScanResponse(true);
-    pAdvertising->setMinPreferred(
-        0x06);  // functions that help with iPhone connections issue
+    pAdvertising->setMinPreferred(0x06); // functions that help with iPhone connections issue
     pAdvertising->setMinPreferred(0x12);
     BLEDevice::startAdvertising();
     Serial.println("Bluetooth initialized");
 }
-
 
 void Carduino_Bluetooth::runLoop(void) {
     // GPS
@@ -111,7 +115,7 @@ void Carduino_Bluetooth::runLoop(void) {
 
     uint8_t gpsData[21];
     gpsData[0] = this->gpsAgent->gd->time;
-    gpsData[1] = this->gpsAgent->gd->time >>  8;
+    gpsData[1] = this->gpsAgent->gd->time >> 8;
     gpsData[2] = this->gpsAgent->gd->time >> 16;
     gpsData[3] = this->gpsAgent->gd->time >> 24;
 
@@ -133,7 +137,5 @@ void Carduino_Bluetooth::runLoop(void) {
     gpsData[19] = 0;
     gpsData[20] = 0;
 
-
     motionCharacteristic->setValue(gpsData, 21);
-
 }

@@ -5,9 +5,8 @@ const int DRIVE_FRAME_SIZE = 14;
 const int FOOTER_SIZE = 1;
 const uint16_t VERSION = 1;
 
-Carduino_Drive::Carduino_Drive(char vin[], uint8_t startFuelLevel,
-                               time_t startTime) {
-    this->bufferCapacity = DRIVE_FRAME_SIZE * 200; //Start with 200 drive frames
+Carduino_Drive::Carduino_Drive(char vin[], uint8_t startFuelLevel, time_t startTime) {
+    this->bufferCapacity = DRIVE_FRAME_SIZE * 200; // Start with 200 drive frames
     this->bufferSize = 0;
 
     this->buffer = (int8_t *)(malloc(this->bufferCapacity));
@@ -18,14 +17,10 @@ Carduino_Drive::Carduino_Drive(char vin[], uint8_t startFuelLevel,
     this->startTime = startTime;
 }
 
-Carduino_Drive::~Carduino_Drive() {
-    free(this->buffer);
-}
+Carduino_Drive::~Carduino_Drive() { free(this->buffer); }
 
-void Carduino_Drive::addFrame(time_t time, uint8_t gpsSpeed, double latitude,
-                              double longitude,
-                              int16_t heading, int16_t altitude,
-                              uint8_t vehicleSpeed) {
+void Carduino_Drive::addFrame(time_t time, uint8_t gpsSpeed, double latitude, double longitude, int16_t heading,
+                              int16_t altitude, uint8_t vehicleSpeed) {
     this->encoder.addPoint(latitude, longitude);
     /*
     |-----GPS Time-----|-----GPS Speed-----|-----Heading-----|-----Altitude-----|-----Vehicle Speed-----|
@@ -40,13 +35,11 @@ void Carduino_Drive::addFrame(time_t time, uint8_t gpsSpeed, double latitude,
     }
 
     for (int i = 0; i < 8; i++) {
-        if(i >= sizeof(time)) {
+        if (i >= sizeof(time)) {
             this->buffer[this->bufferSize + i] = 0;
         } else {
             this->buffer[this->bufferSize + i] = (uint8_t)(time >> (i * 8)) & 0xff;
         }
-
-
     }
 
     this->buffer[this->bufferSize + 8] = gpsSpeed;
@@ -61,19 +54,15 @@ void Carduino_Drive::addFrame(time_t time, uint8_t gpsSpeed, double latitude,
 
     this->bufferSize += DRIVE_FRAME_SIZE;
 
-
     Serial.print(" (");
     Serial.print(latitude);
     Serial.print(",");
     Serial.print(longitude);
     Serial.print(")");
     Serial.println();
-
 }
 
-
-void Carduino_Drive::getDriveData(int8_t **data, size_t *size,
-                                  uint8_t finalFuelTankLevel) {
+void Carduino_Drive::getDriveData(int8_t **data, size_t *size, uint8_t finalFuelTankLevel) {
 
     std::string polyline = this->encoder.encode();
     uint32_t polyLineCount = polyline.length();
@@ -100,10 +89,8 @@ void Carduino_Drive::getDriveData(int8_t **data, size_t *size,
     data[0][26] = (uint8_t)(this->bufferSize >> 16) & 0xff;
     data[0][27] = (uint8_t)(this->bufferSize >> 24);
 
-
     memcpy((data[0] + 28), polyline.c_str(), polyLineCount);
     memcpy((data[0] + 28 + polyLineCount), this->buffer, this->bufferSize);
-
 
     data[0][28 + this->bufferSize + polyLineCount] = finalFuelTankLevel;
 }

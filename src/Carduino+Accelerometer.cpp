@@ -1,7 +1,7 @@
 #include <Arduino.h>
 
-#include <FreematicsMEMS.h>
 #include "Carduino+Accelerometer.h"
+#include <FreematicsMEMS.h>
 
 #define STATE_MEMS_READY 0x20
 #define STATE_STANDBY 0x80
@@ -15,9 +15,7 @@ ORIENTATION ori = {0};
 byte m_state = 0;
 
 MEMS_I2C *mems = 0;
-bool checkState(byte flags) {
-    return (m_state & flags) == flags;
-}
+bool checkState(byte flags) { return (m_state & flags) == flags; }
 
 void calibrateMEMS() {
     // MEMS data collected while sleeping
@@ -64,7 +62,6 @@ Carduino_Accelerometer::Carduino_Accelerometer() {
     Serial.println("Accelerometer initialized");
 }
 
-
 void Carduino_Accelerometer::runLoop(void) {
     mems->read(this->accel, gyr, mag, 0, &ori);
 
@@ -78,9 +75,6 @@ void Carduino_Accelerometer::runLoop(void) {
         }
     }
     this->motion = motion;
-
 }
 
-float Carduino_Accelerometer::getMotion() {
-    return this->motion;
-}
+float Carduino_Accelerometer::getMotion() { return this->motion; }

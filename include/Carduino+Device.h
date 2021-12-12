@@ -4,7 +4,7 @@
 
 class Carduino_Device {
 
-public:
+  public:
     /**
      * Create an instance of the Device manager
      */
@@ -15,8 +15,7 @@ public:
      */
     void runLoop(void);
 
-private:
+  private:
     FreematicsESP32 *sys;
-
 };
 #endif

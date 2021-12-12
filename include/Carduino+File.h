@@ -1,19 +1,17 @@
 #ifndef _CARDUINO_SD_H
 #define _CARDUINO_SD_H
-#include <SPI.h>
 #include <FS.h>
-#include <SD.h>
-#include <SPIFFS.h>
 #include <FreematicsPlus.h>
+#include <SD.h>
+#include <SPI.h>
+#include <SPIFFS.h>
 #include <sstream>
 
 class CStorage;
 
 class CStorage {
-public:
-    virtual bool init() {
-        return true;
-    }
+  public:
+    virtual bool init() { return true; }
     virtual void uninit() {}
     virtual void log(uint16_t pid, int value) {
         char buf[24];
@@ -32,28 +30,23 @@ public:
     }
     virtual void log(uint16_t pid, float value[]) {
         char buf[48];
-        byte len = sprintf(buf, "%X%c%.2f;%.2f;%.2f", pid, m_delimiter, value[0],
-                           value[1], value[2]);
+        byte len = sprintf(buf, "%X%c%.2f;%.2f;%.2f", pid, m_delimiter, value[0], value[1], value[2]);
         dispatch(buf, len);
     }
-    virtual void timestamp(uint32_t ts) {
-        log(0, ts);
-    }
-    virtual void purge() {
-        m_samples = 0;
-    }
-    virtual uint16_t samples() {
-        return m_samples;
-    }
+    virtual void timestamp(uint32_t ts) { log(0, ts); }
+    virtual void purge() { m_samples = 0; }
+    virtual uint16_t samples() { return m_samples; }
     virtual void dispatch(const char *buf, size_t len) {
         // output data via serial
         Serial.write((uint8_t *)buf, len);
         m_samples++;
     }
-protected:
+
+  protected:
     byte checksum(const char *data, int len) {
         byte sum = 0;
-        for (int i = 0; i < len; i++) sum += data[i];
+        for (int i = 0; i < len; i++)
+            sum += data[i];
         return sum;
     }
     virtual void header(const char *devid) {}
@@ -62,8 +55,8 @@ protected:
     char m_delimiter = ':';
 };
 
-class CStorageRAM: public CStorage {
-public:
+class CStorageRAM : public CStorage {
+  public:
     bool init(unsigned int cacheSize) {
         if (m_cacheSize != cacheSize) {
             uninit();
@@ -82,12 +75,8 @@ public:
         m_cacheBytes = 0;
         m_samples = 0;
     }
-    unsigned int length() {
-        return m_cacheBytes;
-    }
-    char *buffer() {
-        return m_cache;
-    }
+    unsigned int length() { return m_cacheBytes; }
+    char *buffer() { return m_cache; }
     void dispatch(const char *buf, size_t len) {
         // reserve some space for checksum
         int remain = m_cacheSize - m_cacheBytes - len - 3;
@@ -101,13 +90,10 @@ public:
         m_samples++;
     }
 
-    void header(const char *devid) {
-        m_cacheBytes = sprintf(m_cache, "%s#", devid);
-    }
+    void header(const char *devid) { m_cacheBytes = sprintf(m_cache, "%s#", devid); }
     void tailer() {
-        //if (m_cache[m_cacheBytes - 1] == ',') m_cacheBytes--;
-        m_cacheBytes += sprintf(m_cache + m_cacheBytes, "*%X",
-                                (unsigned int)checksum(m_cache, m_cacheBytes));
+        // if (m_cache[m_cacheBytes - 1] == ',') m_cacheBytes--;
+        m_cacheBytes += sprintf(m_cache + m_cacheBytes, "*%X", (unsigned int)checksum(m_cache, m_cacheBytes));
     }
     void untailer() {
         char *p = strrchr(m_cache, '*');
@@ -116,19 +102,19 @@ public:
             m_cacheBytes = p + 1 - m_cache;
         }
     }
-protected:
+
+  protected:
     unsigned int m_cacheSize = 0;
     unsigned int m_cacheBytes = 0;
     char *m_cache = 0;
 };
 
 class FileLogger : public CStorage {
-public:
-    FileLogger() {
-        m_delimiter = ',';
-    }
+  public:
+    FileLogger() { m_delimiter = ','; }
     virtual void dispatch(const char *buf, size_t len) {
-        if(!open) return;
+        if (!open)
+            return;
 
         if (m_file.write((uint8_t *)buf, len) != len) {
             // try again
@@ -141,18 +127,15 @@ public:
         m_file.write('\n');
         m_size += (len + 1);
     }
-    virtual uint32_t size() {
-        return m_size;
-    }
+    virtual uint32_t size() { return m_size; }
     virtual void end() {
         m_file.close();
         open = false;
         m_size = 0;
     }
-    virtual void flush() {
-        m_file.flush();
-    }
-protected:
+    virtual void flush() { m_file.flush(); }
+
+  protected:
     uint32_t m_dataTime = 0;
     uint32_t m_dataCount = 0;
     uint32_t m_size = 0;
@@ -162,7 +145,7 @@ protected:
 };
 
 class SDLogger : public FileLogger {
-public:
+  public:
     bool init() {
         SPI.begin();
         if (SD.begin(PIN_SD_CS, SPI, SPI_FREQ)) {
@@ -184,7 +167,6 @@ public:
         open = true;
         File root = SD.open("/DATA");
         SD.mkdir("/DATA");
-
 
         std::stringstream ss;
         ss << "/DATA/" << fileName;
@@ -215,68 +197,69 @@ public:
 };
 
 class SPIFFSLogger : public FileLogger {
-public:
-    bool init() {
-        bool mounted = SPIFFS.begin();
-        if (!mounted) {
-            Serial.println("Formatting SPIFFS...");
-            mounted = SPIFFS.begin(true);
+  public:
+    SPIFFSLogger(FileLogger *next = 0) { m_next = next; }
+    int begin() {
+        if (SPIFFS.begin(true)) {
+            return SPIFFS.totalBytes() - SPIFFS.usedBytes();
         }
-        if (mounted) {
-            Serial.print("SPIFFS:");
-            Serial.print(SPIFFS.totalBytes());
-            Serial.print(" bytes total, ");
-            Serial.print(SPIFFS.usedBytes());
-            Serial.println(" bytes used");
-        } else {
-            Serial.println("No SPIFFS");
-        }
-        return mounted;
+        return -1;
     }
-    bool begin() {
-        this->fileName = fileName;
-        open = true;
-
-        std::stringstream ss;
-        ss << "/DATA/" << fileName;
-        std::string path = ss.str();
-
-
+    void write(const char *buf, byte len) {
+        if (m_next)
+            m_next->write(buf, len);
+        if (m_id == 0)
+            return;
+        if (m_file.write((uint8_t *)buf, len) != len) {
+            purge();
+            if (m_file.write((uint8_t *)buf, len) != len) {
+                Serial.println("Error writing data");
+                return;
+            }
+        }
+        m_file.write('\n');
+    }
+    uint32_t open() {
         File root = SPIFFS.open("/");
+        m_id = getFileID(root);
+        char path[24];
+        sprintf(path, "/DATA/%u.CSV", m_id);
         Serial.print("File: ");
-        Serial.println(path.c_str());
-        m_file = SPIFFS.open(path.c_str(), FILE_WRITE);
+        Serial.println(path);
+        m_dataCount = 0;
+        m_file = SPIFFS.open(path, FILE_WRITE);
         if (!m_file) {
             Serial.println("File error");
-            open = false;
-            return false;
+            m_id = 0;
         }
-        m_dataCount = 0;
-        return true;
+        return m_id;
     }
-    /*private:
-        void purge() {
-            // remove oldest file when unused space is insufficient
-            File root = SPIFFS.open("/");
-            File file;
-            int idx = 0;
-            while(file = root.openNextFile()) {
-                if (!strncmp(file.name(), "/DATA/", 6)) {
-                    unsigned int n = atoi(file.name() + 6);
-                    if (n != 0 && (idx == 0 || n < idx)) idx = n;
-                }
+
+  private:
+    void purge() {
+        // remove oldest file when unused space is insufficient
+        File root = SPIFFS.open("/");
+        File file;
+        int idx = 0;
+        while (file = root.openNextFile()) {
+            if (!strncmp(file.name(), "/DATA/", 6)) {
+                unsigned int n = atoi(file.name() + 6);
+                if (n != 0 && (idx == 0 || n < idx))
+                    idx = n;
             }
-            if (idx) {
-                m_file.close();
-                char path[32];
-                sprintf(path, "/DATA/%u.CSV", idx);
-                SPIFFS.remove(path);
-                Serial.print(path);
-                Serial.println(" removed");
-                sprintf(path, "/DATA/%u.CSV", m_id);
-                m_file = SPIFFS.open(path, FILE_APPEND);
-                if (!m_file) m_id = 0;
-            }
-        }*/
+        }
+        if (idx) {
+            m_file.close();
+            char path[32];
+            sprintf(path, "/DATA/%u.CSV", idx);
+            SPIFFS.remove(path);
+            Serial.print(path);
+            Serial.println(" removed");
+            sprintf(path, "/DATA/%u.CSV", m_id);
+            m_file = SPIFFS.open(path, FILE_APPEND);
+            if (!m_file)
+                m_id = 0;
+        }
+    }
 };
 #endif

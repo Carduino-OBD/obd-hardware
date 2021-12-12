@@ -3,7 +3,7 @@
 
 FreematicsESP32 sys;
 
-//obd.enterLowPowerMode();
+// obd.enterLowPowerMode();
 /**
  * Create an instance of Carduino
  */
@@ -23,9 +23,8 @@ Carduino_Main::Carduino_Main() {
     this->deviceAgent = new Carduino_Device(&sys);
     this->gpsAgent = new Carduino_GPS(&sys);
     this->obdAgent = new Carduino_OBD(&sys, this->accelerometerAgent);
-    this->bluetoothAgent = new Carduino_Bluetooth(this->gpsAgent);
-    this->driveAgent = new Carduino_DriveManager(this->gpsAgent,
-            this->accelerometerAgent, this->obdAgent);
+    this->bluetoothAgent = new Carduino_Bluetooth(this->gpsAgent, this->serial);
+    this->driveAgent = new Carduino_DriveManager(this->gpsAgent, this->accelerometerAgent, this->obdAgent);
     Serial.println("Done initializing");
 }
 
@@ -39,5 +38,4 @@ void Carduino_Main::runLoop(void) {
     this->obdAgent->runLoop();
     this->bluetoothAgent->runLoop();
     this->driveAgent->runLoop();
-
 }

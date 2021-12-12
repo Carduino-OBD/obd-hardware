@@ -1,11 +1,11 @@
 #ifndef _CARDUINO_DEVICE_H
 #define _CARDUINO_DEVICE_H
-#include <FreematicsPlus.h>
 #include "polylineencoder.h"
+#include <FreematicsPlus.h>
 
 class Carduino_Drive {
 
-public:
+  public:
     /**
      * Create an instance of a drive
      */
@@ -16,16 +16,13 @@ public:
      */
     ~Carduino_Drive();
 
-    void addFrame(time_t time, uint8_t gpsSpeed, double latitude,
-                  double longitude,
-                  int16_t heading, int16_t altitude,
+    void addFrame(time_t time, uint8_t gpsSpeed, double latitude, double longitude, int16_t heading, int16_t altitude,
                   uint8_t vehicleSpeed);
-
 
     void getDriveData(int8_t **data, size_t *size, uint8_t finalFuelTankLevel);
     time_t startTime;
 
-private:
+  private:
     gepaf::PolylineEncoder<> encoder;
     int bufferCapacity;
     int bufferSize;

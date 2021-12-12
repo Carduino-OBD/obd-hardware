@@ -4,7 +4,7 @@
 
 class Carduino_GPS {
 
-public:
+  public:
     /**
      * Create an instance of the GPS manager
      */
@@ -17,9 +17,7 @@ public:
 
     GPS_DATA *gd;
 
-private:
+  private:
     FreematicsESP32 *sys;
-
-
 };
 #endif
