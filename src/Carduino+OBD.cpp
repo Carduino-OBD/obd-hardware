@@ -1,7 +1,7 @@
 #include <Arduino.h>
 
-#include <FreematicsPlus.h>
 #include "Carduino+OBD.h"
+#include <FreematicsPlus.h>
 #define RUNNING_VOLTAGE 14
 
 COBD obd;
@@ -11,8 +11,7 @@ bool inLowPowerMode;
 /**
  * Create an instance of the acceloremeter manager
  */
-Carduino_OBD::Carduino_OBD(FreematicsESP32 *sysArg,
-                           Carduino_Accelerometer *accelerometerUnit) {
+Carduino_OBD::Carduino_OBD(FreematicsESP32 *sysArg, Carduino_Accelerometer *accelerometerUnit) {
     Serial.println("Initializing OBD unit...");
 
     Serial.print("TYPE:");
@@ -37,14 +36,13 @@ Carduino_OBD::Carduino_OBD(FreematicsESP32 *sysArg,
 
 void Carduino_OBD::runLoop(void) {
     const float motionThreshold = 0.2;
-    if(inLowPowerMode && this->accelerometerUnit->getMotion() < motionThreshold
-            && obd.getVoltage() < RUNNING_VOLTAGE) {
+    if (inLowPowerMode && this->accelerometerUnit->getMotion() < motionThreshold &&
+        obd.getVoltage() < RUNNING_VOLTAGE) {
         pinMode(PIN_LED, HIGH);
-        //delay(5000);
+        // delay(5000);
         return;
-    } else if (!this->connected
-               && this->accelerometerUnit->getMotion() < motionThreshold
-               && obd.getVoltage() < RUNNING_VOLTAGE && !inLowPowerMode) {
+    } else if (!this->connected && this->accelerometerUnit->getMotion() < motionThreshold &&
+               obd.getVoltage() < RUNNING_VOLTAGE && !inLowPowerMode) {
         Serial.println("OBD not connected and motion below threshold, low power");
         inLowPowerMode = true;
         obd.enterLowPowerMode();
@@ -99,10 +97,6 @@ void Carduino_OBD::runLoop(void) {
     }
 }
 
-uint8_t Carduino_OBD::getVehicleSpeed() {
-    return this->vehicleSpeed;
-}
+uint8_t Carduino_OBD::getVehicleSpeed() { return this->vehicleSpeed; }
 
-bool Carduino_OBD::isConnected() {
-    return this->connected;
-}
+bool Carduino_OBD::isConnected() { return this->connected; }
