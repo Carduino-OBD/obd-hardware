@@ -198,18 +198,26 @@ class SDLogger : public FileLogger {
 
 class SPIFFSLogger : public FileLogger {
   public:
-    SPIFFSLogger(FileLogger *next = 0) { m_next = next; }
-    int begin() {
+    SPIFFSLogger() {}
+    int begin(std::string fileName) {
         if (SPIFFS.begin(true)) {
+            this->fileName = fileName;
+            File root = SPIFFS.open("/");
+
+            std::stringstream ss;
+            ss << "/DATA/" << fileName;
+            std::string path = ss.str();
+
+            Serial.print("File: ");
+            Serial.println(path.c_str());
+            m_dataCount = 0;
+            m_file = SPIFFS.open(path.c_str(), FILE_WRITE);
             return SPIFFS.totalBytes() - SPIFFS.usedBytes();
         }
+
         return -1;
     }
     void write(const char *buf, byte len) {
-        if (m_next)
-            m_next->write(buf, len);
-        if (m_id == 0)
-            return;
         if (m_file.write((uint8_t *)buf, len) != len) {
             purge();
             if (m_file.write((uint8_t *)buf, len) != len) {
@@ -218,48 +226,6 @@ class SPIFFSLogger : public FileLogger {
             }
         }
         m_file.write('\n');
-    }
-    uint32_t open() {
-        File root = SPIFFS.open("/");
-        m_id = getFileID(root);
-        char path[24];
-        sprintf(path, "/DATA/%u.CSV", m_id);
-        Serial.print("File: ");
-        Serial.println(path);
-        m_dataCount = 0;
-        m_file = SPIFFS.open(path, FILE_WRITE);
-        if (!m_file) {
-            Serial.println("File error");
-            m_id = 0;
-        }
-        return m_id;
-    }
-
-  private:
-    void purge() {
-        // remove oldest file when unused space is insufficient
-        File root = SPIFFS.open("/");
-        File file;
-        int idx = 0;
-        while (file = root.openNextFile()) {
-            if (!strncmp(file.name(), "/DATA/", 6)) {
-                unsigned int n = atoi(file.name() + 6);
-                if (n != 0 && (idx == 0 || n < idx))
-                    idx = n;
-            }
-        }
-        if (idx) {
-            m_file.close();
-            char path[32];
-            sprintf(path, "/DATA/%u.CSV", idx);
-            SPIFFS.remove(path);
-            Serial.print(path);
-            Serial.println(" removed");
-            sprintf(path, "/DATA/%u.CSV", m_id);
-            m_file = SPIFFS.open(path, FILE_APPEND);
-            if (!m_file)
-                m_id = 0;
-        }
     }
 };
 #endif
